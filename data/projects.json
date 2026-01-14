@@ -1,0 +1,9 @@
+[
+  {
+    "id": "p1",
+    "title": "Portfolio Backend on Go",
+    "description": "REST API на чистом Go с JSON-хранилищем",
+    "tags": ["go", "api", "portfolio"],
+    "url": "https://example.com/projects/go-backend"
+  }
+]

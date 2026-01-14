@@ -1,0 +1,9 @@
+[
+  {
+    "id": "post-1",
+    "title": "Как я сделал свой backend на Go",
+    "content": "Краткая история о создании API для портфолио.",
+    "tags": ["go", "portfolio"],
+    "published_at": "2024-12-01"
+  }
+]

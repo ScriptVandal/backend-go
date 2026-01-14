@@ -1,0 +1,4 @@
+[
+  { "id": "s1", "name": "Go", "level": "mid", "category": "backend" },
+  { "id": "s2", "name": "JavaScript", "level": "mid", "category": "frontend" }
+]
