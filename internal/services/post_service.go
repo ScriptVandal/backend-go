@@ -11,7 +11,7 @@ type PostService struct {
 }
 
 func NewPostService(repo PostRepo) *PostService {
-    return &PostPostService{repo: repo}
+    return &PostService{repo: repo}
 }
 
 func (s *PostService) ListPosts() ([]models.Post, error) {
