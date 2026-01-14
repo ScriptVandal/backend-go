@@ -1,8 +1,8 @@
 # backend-go (portfolio API)
 
-API для портфолио на чистом Go (net/http) с JSON-хранилищем и инструкциями по миграции на PostgreSQL.
+API для портфолио на чистом Go (net/http) с JSON-хранилищем и опциональной работой с PostgreSQL.
 
-## Запуск локально (JSON-хранилище)
+## Запуск локально (JSON-хранилище по умолчанию)
 1. `go run ./cmd/server`
 2. Эндпоинты:
    - `GET /health`
@@ -10,6 +10,54 @@ API для портфолио на чистом Go (net/http) с JSON-храни
    - `GET /api/skills`
    - `GET /api/contacts`
    - `GET /api/posts`
+
+## Переключение на PostgreSQL
+- Приложение автоматически использует PG, если установлена переменная `DATABASE_URL`.
+- В `cmd/server/main.go` уже есть переключение: при наличии `DATABASE_URL` выбираются PG-репозитории, иначе JSON.
+
+### Подготовка БД
+1. Запустите Postgres (например, `docker-compose up db`).
+2. Создайте таблицы:
+```sql
+CREATE TABLE projects (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT,
+  tags TEXT[],
+  url TEXT
+);
+
+CREATE TABLE skills (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  level TEXT,
+  category TEXT
+);
+
+CREATE TABLE contacts (
+  email TEXT,
+  telegram TEXT,
+  linkedin TEXT,
+  github TEXT
+);
+
+CREATE TABLE posts (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  content TEXT,
+  tags TEXT[],
+  published_at TEXT
+);
+```
+3. Установите `DATABASE_URL`, например:
+```
+export DATABASE_URL=postgres://postgres:postgres@localhost:5432/portfolio?sslmode=disable
+```
+4. Запустите: `go run ./cmd/server` — при наличии `DATABASE_URL` будут использованы PG-репозитории для всех сущностей.
+
+### Пример работы с массивами (tags)
+- В PG-репозиториях для projects и posts поле `tags` читается через `pq.Array(&slice)`. 
+- При вставке используйте `pq.Array(slice)` в `Exec`/`Query`.
 
 ## CORS
 Разрешен `http://localhost:3000`. При необходимости поменяйте в `internal/middleware/cors.go`.
@@ -19,32 +67,6 @@ API для портфолио на чистом Go (net/http) с JSON-храни
 curl -i http://localhost:8080/health
 curl -i http://localhost:8080/api/projects
 ```
-
-## Миграция на PostgreSQL (пример для projects)
-1. Запустите Postgres (например, `docker-compose up db`).
-2. Создайте таблицу:
-```sql
-CREATE TABLE projects (
-  id TEXT PRIMARY KEY,
-  title TEXT NOT NULL,
-  description TEXT,
-  tags TEXT[],
-  url TEXT
-);
-```
-3. Установите `DATABASE_URL`, например:
-```
-export DATABASE_URL=postgres://postgres:postgres@localhost:5432/portfolio?sslmode=disable
-```
-4. В `cmd/server/main.go` замените JSON-репозиторий на Postgres:
-```go
-// import "database/sql"
-// import _ "github.com/lib/pq"
-// dsn := os.Getenv("DATABASE_URL")
-// db, _ := sql.Open("postgres", dsn)
-// projectRepo := repositories.NewPGProjectRepository(db)
-```
-5. Аналогично можно сделать PG-репозитории для skills/contacts/posts.
 
 ## Docker
 ```
@@ -66,11 +88,9 @@ useEffect(() => {
     .then(setProjects)
 }, [])
 ```
-Или `axios.get("http://localhost:8080/api/projects")`.
+Или `axios.get("http://localhost:8080/api/projects");`.
 
 ## Дальнейшие шаги
 - Добавить аутентификацию (JWT / cookies) для POST/PUT/DELETE.
 - Вынести конфиг CORS и PORT в env.
-- Добавить go.sum: `go mod tidy`.
-- Написать репозитории для Postgres для остальных сущностей.
 - Добавить авто-миграции или SQL-скрипты.
