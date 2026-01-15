@@ -9,6 +9,10 @@ import (
 
 type ProjectRepository interface {
     List() ([]models.Project, error)
+    GetByID(id string) (*models.Project, error)
+    Create(project *models.Project) error
+    Update(project *models.Project) error
+    Delete(id string) error
 }
 
 type JSONProjectRepository struct {
@@ -31,4 +35,29 @@ func (r *JSONProjectRepository) List() ([]models.Project, error) {
         return nil, err
     }
     return items, nil
+}
+
+func (r *JSONProjectRepository) GetByID(id string) (*models.Project, error) {
+    items, err := r.List()
+    if err != nil {
+        return nil, err
+    }
+    for _, item := range items {
+        if item.ID == id {
+            return &item, nil
+        }
+    }
+    return nil, nil
+}
+
+func (r *JSONProjectRepository) Create(project *models.Project) error {
+    return ErrReadOnly
+}
+
+func (r *JSONProjectRepository) Update(project *models.Project) error {
+    return ErrReadOnly
+}
+
+func (r *JSONProjectRepository) Delete(id string) error {
+    return ErrReadOnly
 }

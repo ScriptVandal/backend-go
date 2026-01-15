@@ -9,6 +9,10 @@ import (
 
 type PostRepository interface {
     List() ([]models.Post, error)
+    GetByID(id string) (*models.Post, error)
+    Create(post *models.Post) error
+    Update(post *models.Post) error
+    Delete(id string) error
 }
 
 // JSONPostRepository implements PostRepository using local JSON file.
@@ -32,4 +36,29 @@ func (r *JSONPostRepository) List() ([]models.Post, error) {
         return nil, err
     }
     return items, nil
+}
+
+func (r *JSONPostRepository) GetByID(id string) (*models.Post, error) {
+    items, err := r.List()
+    if err != nil {
+        return nil, err
+    }
+    for _, item := range items {
+        if item.ID == id {
+            return &item, nil
+        }
+    }
+    return nil, nil
+}
+
+func (r *JSONPostRepository) Create(post *models.Post) error {
+    return ErrReadOnly
+}
+
+func (r *JSONPostRepository) Update(post *models.Post) error {
+    return ErrReadOnly
+}
+
+func (r *JSONPostRepository) Delete(id string) error {
+    return ErrReadOnly
 }
